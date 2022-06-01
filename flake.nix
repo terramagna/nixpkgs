@@ -57,13 +57,33 @@
     buildFlakeForSystem = system: let
       pkgs = nixpkgsFor system;
       pre-commit-check = pre-commit-check-for system;
+
+      overlayPkgs =
+        builtins.listToAttrs
+        (builtins.map (p: {
+            name = p;
+            value = pkgs.${p};
+          })
+          (builtins.attrNames (overlay pkgs pkgs)));
     in rec {
-      checks = {inherit pre-commit-check;};
+      checks = {
+        inherit pre-commit-check;
+
+        # Ensures that all our overlays build correctly.
+        overlay-check = pkgs.symlinkJoin {
+          name = "all-overlays";
+          paths = builtins.attrValues overlayPkgs;
+        };
+      };
+
       lib = import ./lib {inherit pkgs;};
+
       devShells.default = import ./shell.nix {
         inherit pkgs lib;
         startup.pre-commit = pre-commit-check.shellHook;
       };
+
+      packages = overlayPkgs;
     };
 
     baseFlake = {

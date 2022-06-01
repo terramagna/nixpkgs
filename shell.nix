@@ -23,4 +23,6 @@ in
         category = "helpers";
       };
     };
+
+    packages = pkgs: with pkgs; [jq];
   }
