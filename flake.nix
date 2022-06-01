@@ -88,9 +88,20 @@
 
     baseFlake = {
       overlays.default = overlay;
+      lib = {inherit forEachSystem;};
+      templates = {
+        shellOnly = {
+          path = ./templates/shellOnly;
+          description = "A template for shell only projects";
+        };
+      };
     };
 
     systemFlakes = forEachSystem buildFlakeForSystem;
   in
-    baseFlake // systemFlakes;
+    systemFlakes
+    // {
+      lib = systemFlakes.lib // baseFlake.lib;
+    }
+    // (builtins.removeAttrs baseFlake ["lib"]);
 }
