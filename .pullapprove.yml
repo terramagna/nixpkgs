@@ -1,0 +1,9 @@
+version: 3
+
+extends: "terramagna/pr-automation"
+
+groups:
+  co-devexp:
+    conditions:
+      - >
+        true
