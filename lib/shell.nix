@@ -1,5 +1,7 @@
 {pkgs}: let
   inherit (pkgs) buildFHSUserEnvBubblewrap;
+  inherit (pkgs.lib.strings) hasInfix;
+  inherit (pkgs.stdenv) isLinux;
 
   attrsToList = pkgs.lib.mapAttrsToList (name: value: {inherit name value;});
   attrsToSubmodulesList = attrs:
@@ -10,6 +12,11 @@
     }:
       value // {inherit name;})
     (attrsToList attrs);
+
+  isNixOS = let
+    issue = builtins.readFile "/etc/issue";
+  in
+    isLinux && (hasInfix "NixOS" issue);
 
   /*
     *
@@ -53,6 +60,9 @@
    *   shell.
    * - `startup`: An attribute set which values will be executed at the start of the shell.
    *   This is an attribute set to improve the readability of the startup code.
+   * - `bubblewrapOutsideNixOS`: A boolean controlling if we should enable bubblewrapping
+   *   outside of NixOS systems. Defaults to false, as non-NixOS system already have proper
+   *   FHS structure.
    *
    * Other than these, all of the remaining attributes are passed unchanged to the underlying
    * shell function (be it `mkShell` or `buildFHSUserEnvBubblewrap`). This behavior is present
@@ -118,6 +128,7 @@
       env ? {},
       packages ? _pkgs: [],
       startup ? {},
+      bubblewrapOutsideNixOS ? false,
       ...
     } @ args: let
       cleanArgs = builtins.removeAttrs args ["env" "commands" "packages" "startup" "bubblewrap"];
@@ -161,7 +172,10 @@
           shellHook = "source ${bashEnv}";
         });
     in
-      if bubblewrap
+      # Bubblewrapping outside NixOS cause problems if the user don't configure
+      # their system also using Nix, as the `/usr` directories will be recreated
+      # using only what we provide in the environment.
+      if (bubblewrap && (isNixOS || bubblewrapOutsideNixOS))
       then bubbleWrappedShell
       else commonShell;
 in {
