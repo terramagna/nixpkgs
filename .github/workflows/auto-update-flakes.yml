@@ -48,6 +48,7 @@ jobs:
   push-changes:
     name: "Push new inputs"
     needs: [test-new-inputs]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2.4.0
