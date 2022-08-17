@@ -3,7 +3,7 @@ name: Continous Integration
 on:
   pull_request:
     branches:
-      - maim
+      - main
   push:
     branches:
       - main
