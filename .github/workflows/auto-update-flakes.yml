@@ -39,6 +39,7 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             trusted-binary-caches = https://cache.nixos.org
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+      - run: rm flake.lock
       - uses: actions/download-artifact@v3
         with:
           name: flake-lock
@@ -52,6 +53,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.4.0
+      - run: rm flake.lock
       - uses: actions/download-artifact@v3
         with:
           name: flake-lock
