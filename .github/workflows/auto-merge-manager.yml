@@ -28,8 +28,9 @@ jobs:
 
     # We need to duplicate the base check here due to `pull_request_review`.
     if: >
-      (startsWith(github.event.pull_request.base.ref, 'main'))
-      && (github.event.action == 'ready_for_review' || !github.event.pull_request.draft)
+      (startsWith(github.event.pull_request.base.ref, 'main')) &&
+      (github.event.action == 'ready_for_review' ||
+      !github.event.pull_request.draft)
 
     steps:
       - name: Query Pull Request ID
@@ -50,7 +51,7 @@ jobs:
               }
             }
     outputs:
-      pr_id: ${{ fromJSON(steps.query_pr_id.outputs.data).repository.pullRequest.id }}
+      pr_id: ${{fromJSON(steps.query_pr_id.outputs.data).repository.pullRequest.id}}
 
   #
   # Disable Auto Merge

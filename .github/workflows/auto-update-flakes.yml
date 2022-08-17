@@ -2,7 +2,7 @@ name: Update Flake Inputs
 
 on:
   schedule:
-  - cron: "0 4 * * 1"
+    - cron: "0 4 * * 1"
 
 jobs:
   update-flakes:
@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2.4.0
-    - uses: cachix/install-nix-action@v15
-      with:
-        extra_nix_config: |
-          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          trusted-binary-caches = https://cache.nixos.org
-          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-    - run: "nix flake update"
-    - uses: actions/upload-artifact@v3
-      with:
-        name: flake-lock
-        path: flake.lock
+      - uses: actions/checkout@v2.4.0
+      - uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            trusted-binary-caches = https://cache.nixos.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+      - run: "nix flake update"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: flake-lock
+          path: flake.lock
 
   test-new-inputs:
     name: "Test new inputs"
@@ -32,18 +32,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2.4.0
-    - uses: cachix/install-nix-action@v15
-      with:
-        extra_nix_config: |
-          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          trusted-binary-caches = https://cache.nixos.org
-          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
-    - uses: actions/download-artifact@v3
-      with:
-        name: flake-lock
-        path: flake.lock
-    - run: "nix flake check"
+      - uses: actions/checkout@v2.4.0
+      - uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            trusted-binary-caches = https://cache.nixos.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+      - uses: actions/download-artifact@v3
+        with:
+          name: flake-lock
+          path: flake.lock
+      - run: "nix flake check"
 
   push-changes:
     name: "Push new inputs"
@@ -51,21 +51,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2.4.0
-    - uses: actions/download-artifact@v3
-      with:
-        name: flake-lock
-        path: flake.lock
-    - name: Commit changes
-      run: |
-        git config user.name "TerraMagna";
-        git config user.email "fides@terramagna.com.br";
+      - uses: actions/checkout@v2.4.0
+      - uses: actions/download-artifact@v3
+        with:
+          name: flake-lock
+          path: flake.lock
+      - name: Commit changes
+        run: |
+          git config user.name "TerraMagna";
+          git config user.email "fides@terramagna.com.br";
 
-        if git diff --quiet flake.lock; then
-          echo "No changes in flake.lock";
-        else
-          echo "Changes in flake.lock detected, commiting";
-          git add flake.lock;
-          git commit -m "chore(deps): $(date +%F) auto-update flake.lock";
-          git push
-        fi
+          if git diff --quiet flake.lock; then
+            echo "No changes in flake.lock";
+          else
+            echo "Changes in flake.lock detected, commiting";
+            git add flake.lock;
+            git commit -m "chore(deps): $(date +%F) auto-update flake.lock";
+            git push
+          fi
