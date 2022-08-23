@@ -1,11 +1,11 @@
 {
-  pkgs ? builtins.throw "Did you use `nix-shell`? This configuration uses flakes and only supports `nix develop`",
   lib ? null,
   startup ? {},
 }: let
   inherit (lib) mkTmShell;
 in
   mkTmShell {
+    bubblewrap = true;
     inherit startup;
 
     name = "tm-nixpkgs";
