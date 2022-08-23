@@ -79,7 +79,7 @@
       lib = import ./lib {inherit pkgs;};
 
       devShells.default = import ./shell.nix {
-        inherit pkgs lib;
+        inherit lib;
         startup.pre-commit = pre-commit-check.shellHook;
       };
 
