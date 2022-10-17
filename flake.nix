@@ -12,10 +12,10 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     flake-utils,
     pre-commit-hooks,
+    ...
   }: let
     forEachSystem = flake-utils.lib.eachSystem (with flake-utils.lib.system; [
       x86_64-linux

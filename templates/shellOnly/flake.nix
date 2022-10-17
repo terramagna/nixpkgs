@@ -6,10 +6,7 @@
     tm-nixpkgs.url = "github:terramagna/nixpkgs";
   };
 
-  outputs = {
-    self,
-    tm-nixpkgs,
-  }:
+  outputs = {tm-nixpkgs, ...}:
     tm-nixpkgs.lib.forEachSystem (system: let
       tm-lib = tm-nixpkgs.lib.${system};
     in {
