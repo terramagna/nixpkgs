@@ -135,6 +135,10 @@
       bubblewrapOutsideNixOS ? false,
       ...
     } @ args: let
+      startupScript = pkgs.writeScriptBin "startup" ''
+        ${builtins.concatStringsSep "\n" (builtins.attrValues startup)}
+      '';
+
       cleanArgs = builtins.removeAttrs args ["env" "commands" "packages" "startup" "bubblewrap"];
       commandsList =
         (attrsToSubmodulesList commands)
@@ -149,11 +153,17 @@
             help = "prints this menu";
             category = "general commands";
           }
+          {
+            name = "startup";
+            command = "${startupScript}/bin/startup";
+            help = "re-run the shell startup process";
+            category = "general commands";
+          }
         ];
 
       bashEnv = pkgs.writeText "bash-env" ''
         ${builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (n: v: "export ${n}=${v}") env))}
-        ${builtins.concatStringsSep "\n" (builtins.attrValues startup)}
+        ${startupScript}/bin/startup
 
         menu
 
