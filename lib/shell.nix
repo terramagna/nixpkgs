@@ -14,7 +14,10 @@
     (attrsToList attrs);
 
   isNixOS = let
-    issue = builtins.readFile "/etc/issue";
+    issue =
+      if builtins.pathExists "/etc/issue"
+      then builtins.readFile "/etc/issue"
+      else "";
   in
     isLinux && (hasInfix "NixOS" issue);
 
@@ -120,6 +123,8 @@
         "\n[${category}]\n\n" + builtins.concatStringsSep "\n" (map opCmd cmd);
     in
       builtins.concatStringsSep "\n" (map opCat commandByCategoriesSorted) + "\n";
+
+    userShell = builtins.getEnv "SHELL";
   in
     {
       bubblewrap ? false,
@@ -147,12 +152,12 @@
         ];
 
       bashEnv = pkgs.writeText "bash-env" ''
-        export PS1='\033[0;31m[\u:\W]\033[0m '
-
         ${builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (n: v: "export ${n}=${v}") env))}
         ${builtins.concatStringsSep "\n" (builtins.attrValues startup)}
 
         menu
+
+        exec ${userShell}
       '';
 
       bubbleWrappedShell =
