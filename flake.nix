@@ -2,7 +2,7 @@
   description = "Nix packages and utilities used at TerraMagna";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
 
     flake-utils.url = "github:numtide/flake-utils";
 
@@ -44,13 +44,7 @@
           alejandra.enable = true;
           statix.enable = true;
 
-          deadnix = {
-            enable = true;
-            name = "deadnix";
-            description = "A dead code analyser for Nix expressions";
-            types = ["file" "nix"];
-            entry = "${pkgs.deadnix}/bin/deadnix -e -f";
-          };
+          deadnix.enable = true;
         };
       };
 
