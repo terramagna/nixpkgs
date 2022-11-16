@@ -163,7 +163,7 @@
 
       bashEnv = pkgs.writeText "bash-env" ''
         ${builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (n: v: "export ${n}=${v}") env))}
-        ${startupScript}/bin/startup
+        . ${startupScript}/bin/startup
 
         menu
 
@@ -183,7 +183,7 @@
       commonShell = pkgs.mkShell (cleanArgs
         // {
           packages = (packages pkgs) ++ map commandToBin commandsList;
-          shellHook = "source ${bashEnv}";
+          shellHook = ". ${bashEnv}";
         });
     in
       # Bubblewrapping outside NixOS cause problems if the user don't configure
