@@ -166,8 +166,6 @@
         ${startupScript}/bin/startup
 
         menu
-
-        exec ${userShell}
       '';
 
       bubbleWrappedShell =
