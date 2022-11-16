@@ -35,9 +35,7 @@
     in
       sys: allPkgs.pkgs.${sys};
 
-    pre-commit-check-for = sys: let
-      pkgs = nixpkgsFor sys;
-    in
+    pre-commit-check-for = sys:
       pre-commit-hooks.lib.${sys}.run {
         src = ./.;
         hooks = {
