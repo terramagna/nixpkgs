@@ -124,7 +124,13 @@
     in
       builtins.concatStringsSep "\n" (map opCat commandByCategoriesSorted) + "\n";
 
-    userShell = builtins.getEnv "SHELL";
+    # May be empty if the user doesn't pass `--impure`.
+    maybeUserShell = builtins.getEnv "SHELL";
+
+    shell =
+      if maybeUserShell != ""
+      then maybeUserShell
+      else "${pkgs.bashInteractive}/bin/bash";
   in
     {
       bubblewrap ? false,
@@ -162,12 +168,22 @@
         ];
 
       bashEnv = pkgs.writeText "bash-env" ''
-        ${builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs (n: v: "export ${n}=${v}") env))}
+        # HACK: Apparently, `nix develop` is setting `SHELL` with a non-interactive Bash, which
+        # causes issue such as those described here:
+        # - https://github.com/NixOS/nixpkgs/issues/29960
+        # - https://github.com/NixOS/nix/issues/2034
+        export SHELL="${shell}"
+
+        ${builtins.concatStringsSep "\n" (
+          builtins.attrValues (
+            builtins.mapAttrs (n: v: "export ${n}=${v}") env
+          )
+        )}
         . ${startupScript}/bin/startup
 
         menu
 
-        exec ${userShell}
+        exec ${shell}
       '';
 
       bubbleWrappedShell =
@@ -182,7 +198,7 @@
 
       commonShell = pkgs.mkShell (cleanArgs
         // {
-          packages = (packages pkgs) ++ map commandToBin commandsList;
+          packages = (packages pkgs) ++ [pkgs.bashInteractive] ++ map commandToBin commandsList;
           shellHook = ". ${bashEnv}";
         });
     in
