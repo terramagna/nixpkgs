@@ -1,5 +1,9 @@
-{pkgs}: let
-  inherit (pkgs) buildFHSUserEnvBubblewrap;
+{
+  pkgs,
+  lib,
+}: let
+  inherit (lib.invocation) isInvocationImpure;
+  inherit (pkgs.lib.asserts) assertMsg;
   inherit (pkgs.lib.strings) hasInfix;
   inherit (pkgs.stdenv) isLinux;
 
@@ -124,12 +128,9 @@
     in
       builtins.concatStringsSep "\n" (map opCat commandByCategoriesSorted) + "\n";
 
-    # May be empty if the user doesn't pass `--impure`.
-    maybeUserShell = builtins.getEnv "SHELL";
-
     shell =
-      if maybeUserShell != ""
-      then maybeUserShell
+      if isInvocationImpure
+      then builtins.getEnv "SHELL"
       else "${pkgs.bashInteractive}/bin/bash";
   in
     {
@@ -202,12 +203,14 @@
           shellHook = ". ${bashEnv}";
         });
     in
+      assert assertMsg (bubblewrap && isLinux -> isInvocationImpure)
+      "Bubblewrap configured, Linux users need to pass --impure.";
       # Bubblewrapping outside NixOS cause problems if the user don't configure
       # their system also using Nix, as the `/usr` directories will be recreated
       # using only what we provide in the environment.
-      if (bubblewrap && (isNixOS || bubblewrapOutsideNixOS))
-      then bubbleWrappedShell
-      else commonShell;
+        if (bubblewrap && (isNixOS || bubblewrapOutsideNixOS))
+        then bubbleWrappedShell
+        else commonShell;
 in {
   inherit mkTmShell;
 }
